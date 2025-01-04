@@ -6,15 +6,16 @@ def check_hotmail(email, password):
     try:
         smtp_server = "smtp-mail.outlook.com"
         smtp_port = 587
-        server = smtplib.SMTP(smtp_server, smtp_port)
+        # Set a timeout to prevent it from hanging
+        server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
         server.starttls()
         server.login(email, password)
         server.quit()
-        return "Raw response: Login Successful"
+        return f"{email}:{password} => Raw response: Login Successful"
     except smtplib.SMTPAuthenticationError as e:
-        return f"Raw response: {e.smtp_error.decode('utf-8')}"  # Decoding raw SMTP response
+        return f"{email}:{password} => Raw response: {e.smtp_error.decode('utf-8')}"  # Decoding raw SMTP response
     except Exception as e:
-        return f"Raw response: {str(e)}\n{traceback.format_exc()}"
+        return f"{email}:{password} => Raw response: {str(e)}\n{traceback.format_exc()}"
 
 def process_accounts(file_path):
     results = []
@@ -24,7 +25,7 @@ def process_accounts(file_path):
     def handle_account(line):
         email, password = line.strip().split(":")
         response = check_hotmail(email, password)
-        return f"{email}:{password} => {response}"
+        return response
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(handle_account, line) for line in accounts]

@@ -2,7 +2,7 @@ import smtplib
 import traceback
 import concurrent.futures
 
-def check_gmail(email, password):
+def check_hotmail(email, password):
     try:
         smtp_server = "smtp-mail.outlook.com"
         smtp_port = 587
@@ -19,7 +19,7 @@ def check_gmail(email, password):
 
 def process_account(line):
     email, password = line.strip().split(":")
-    return check_gmail(email, password)
+    return check_hotmail(email, password)
 
 def main():
     try:

